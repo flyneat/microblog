@@ -112,20 +112,22 @@ def query_instruction():
 
 def query_default():
     args = get_req_args()
-    limit = DEFAULT_LIMIT
-    page = DEFAULT_PAGE
     try:
+        limit = DEFAULT_LIMIT
         lt = int(args.get('limit', -1))
         if lt > 0:
             limit = lt
-    except Exception as e:
+    except ValueError as e:
         print(f'取limit参数出现异常，原因{e}')
+        return resp_json(RetCode.EMPTY_ARG, f"limit = {args.get('limit')} 不是整数")
     try:
+        page = DEFAULT_PAGE
         p = int(args.get('page', -1))
         if p > 0:
             page = p
-    except Exception as e:
+    except ValueError as e:
         print(f'取page参数出现异常，原因{e}')
+        return resp_json(RetCode.ValueError, f"page = {args.get('page')} 不是整数")
 
     offset = (page - 1) * limit
     ins_list = Instruction.query.limit(limit).offset(offset).all()

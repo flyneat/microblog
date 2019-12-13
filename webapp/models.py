@@ -1,3 +1,5 @@
+from typing import Any
+
 from webapp import db
 from datetime import datetime
 import json
@@ -78,7 +80,20 @@ class PostFile(db.Model):
      上传文件表
     """
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30), nullable=False, index=True)
-    content = db.Column(db.LargeBinary)
+    name = db.Column(db.String(100), index=True)
+    type = db.Column(db.String(10)) # 文件类型，如（txt,doc,img）
+    length = db.Column(db.Integer, default=0) # 文件大小，单文件最大4GB
+    path = db.Column(db.String(1000))
     posttime = db.Column(db.DateTime, index=True, default=datetime.utcnow)  # 上传时间
     sn = db.Column(db.String(20), db.ForeignKey('instruction.sn'), index=True)
+
+    def __init__(self, info: dict) -> None:
+        super().__init__()
+        for k, v in info.items():
+            self.__setattr__(k, v)
+
+    def __repr__(self) -> str:
+        return f'name: {self.name}, length: {self.length}'
+
+
+

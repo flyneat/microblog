@@ -1,6 +1,22 @@
+import os
+
 DEFAULT_LIMIT = 10
 DEFAULT_PAGE = 1
 
+# APP_BASE_DIR = os.getcwd()
+# DATA_DIR = APP_BASE_DIR + '/webapp/data'
+DATA_DIR = './webapp/data'
+# POST_FILE_DIR = APP_BASE_DIR + '/webapp/data/post_file'
+POST_FILE_DIR = './webapp/data/post_file'
+
+''' 默认的文件类型分类 '''
+FILE_TYPE_MAP = {
+    'doc': ('txt', 'pdf', 'doc', 'docx', 'xlsx', 'ppt'),
+    'img': ('png', 'jpg', 'jpeg', 'gif'),
+    'audio': ('mp3',),
+    'video': ('mp4', 'flv', 'avi'),
+    'log': ('log',)
+}
 
 class RetCode:
     """
@@ -29,6 +45,7 @@ class RetCode:
     CLIENT_EXCEPTION = 100
     EMPTY_ARG = 101
     RES_NOT_EXIST = 102
+    ValueError = 103
 
     SERVER_EXCEPTION = 200
     DB_ADD_ERROR = 201
@@ -37,3 +54,4 @@ class RetCode:
     DB_QUERY_ERROR = 204
     JSON_ENCODE_ERROR = 205
     JSON_DECODE_ERROR = 206
+    FILE_SAVE_ERROR = 207
