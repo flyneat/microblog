@@ -3,11 +3,11 @@ import os
 DEFAULT_LIMIT = 10
 DEFAULT_PAGE = 1
 
-# APP_BASE_DIR = os.getcwd()
-# DATA_DIR = APP_BASE_DIR + '/webapp/data'
-DATA_DIR = './webapp/data'
-# POST_FILE_DIR = APP_BASE_DIR + '/webapp/data/post_file'
-POST_FILE_DIR = './webapp/data/post_file'
+APP_BASE_DIR = os.getcwd()
+DATA_DIR = APP_BASE_DIR + '/webapp/data'
+R_DATA_DIR = 'webapp/data'
+POST_FILE_DIR = DATA_DIR + '/post_file'
+R_POST_FILE_DIR = 'webapp/data/post_file'
 
 ''' 默认的文件类型分类 '''
 FILE_TYPE_MAP = {
@@ -45,7 +45,8 @@ class RetCode:
     CLIENT_EXCEPTION = 100
     EMPTY_ARG = 101
     RES_NOT_EXIST = 102
-    ValueError = 103
+    INVALID_PARAMETER = 103
+
 
     SERVER_EXCEPTION = 200
     DB_ADD_ERROR = 201

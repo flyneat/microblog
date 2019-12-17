@@ -1,6 +1,6 @@
-from webapp import app
+from . import app
 from flask import render_template, flash, redirect, url_for, request
-from webapp.forms import LoginForm
+from .forms import LoginForm
 
 
 @app.route('/')
@@ -19,7 +19,8 @@ def index():
             'body': 'The Avengers movie was so cool!'
         }
     ]
-    return render_template('index.html', title=title, user=user, posts=posts)
+    insts_id = 3
+    return render_template('index.html', title=title, user=user, posts=posts, insts_id=insts_id)
 
 
 @app.route('/login', methods=['GET', 'POST'])

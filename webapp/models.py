@@ -1,6 +1,4 @@
-from typing import Any
-
-from webapp import db
+from . import db
 from datetime import datetime
 import json
 
@@ -55,7 +53,7 @@ class Instruction(db.Model):
     # 用户id，标识是谁发出的指令
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    postfiles = db.relationship('PostFile', backref='insts', lazy='dynamic')
+    postfiles = db.relationship('PostFile', backref='who', lazy='dynamic')
 
     # def __str__(self):
     #     ftuple = (self.id, self.sn, self.content, self.state, self.timestamp, self.user_id)
@@ -74,6 +72,16 @@ class Instruction(db.Model):
     def __repr__(self) -> str:
         return f'Instruction: sn:{self.sn}, content:{self.content}'
 
+    def dict_form(self):
+        return {
+            "id": self.id,
+            "sn": self.sn,
+            "content": json.loads(self.content),
+            "state": self.state,
+            "timestamp": self.timestamp.__str__(),
+            "user_id": self.user_id
+        }
+
 
 class PostFile(db.Model):
     """
@@ -81,11 +89,13 @@ class PostFile(db.Model):
     """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), index=True)
-    type = db.Column(db.String(10)) # 文件类型，如（txt,doc,img）
-    length = db.Column(db.Integer, default=0) # 文件大小，单文件最大4GB
-    path = db.Column(db.String(1000))
-    posttime = db.Column(db.DateTime, index=True, default=datetime.utcnow)  # 上传时间
-    sn = db.Column(db.String(20), db.ForeignKey('instruction.sn'), index=True)
+    type = db.Column(db.String(10))  # 文件类型，如（txt,doc,img）
+    length = db.Column(db.Integer, default=0)  # 文件大小(单位：byte)，理论上支持单文件最大4GB
+    path = db.Column(db.String(1000))  # 文件存储路径
+    uptime = db.Column(db.DateTime, index=True, default=datetime.utcnow)  # 上传时间(UTC)
+    sn = db.Column(db.String(20), index=True)
+
+    insts_id = db.Column(db.Integer, db.ForeignKey('instruction.id'))  # 指令id
 
     def __init__(self, info: dict) -> None:
         super().__init__()
@@ -95,5 +105,14 @@ class PostFile(db.Model):
     def __repr__(self) -> str:
         return f'name: {self.name}, length: {self.length}'
 
-
-
+    def dict_form(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'type': self.type,
+            'length': self.length,
+            'path': self.path,
+            'uptime': self.uptime.__str__(),
+            'sn': self.sn,
+            'insts_id': self.insts_id
+        }

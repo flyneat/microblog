@@ -99,48 +99,14 @@ def update_instruction():
         return resp_succ()
 
 
+from ..utils import query_by_page
 @app.route('/api/instruction/query', methods=['GET', 'POST'])
 def query_instruction():
     http_method = get_http_method().upper()
     if http_method == 'GET':
         # 默认分页查询
-        return query_default()
+        return query_by_page(Instruction)
     else:
         # todo: 条件查询
         return resp_json(RetCode.OK, '条件查询功能待实现')
 
-
-def query_default():
-    args = get_req_args()
-    try:
-        limit = DEFAULT_LIMIT
-        lt = int(args.get('limit', -1))
-        if lt > 0:
-            limit = lt
-    except ValueError as e:
-        print(f'取limit参数出现异常，原因{e}')
-        return resp_json(RetCode.EMPTY_ARG, f"limit = {args.get('limit')} 不是整数")
-    try:
-        page = DEFAULT_PAGE
-        p = int(args.get('page', -1))
-        if p > 0:
-            page = p
-    except ValueError as e:
-        print(f'取page参数出现异常，原因{e}')
-        return resp_json(RetCode.ValueError, f"page = {args.get('page')} 不是整数")
-
-    offset = (page - 1) * limit
-    ins_list = Instruction.query.limit(limit).offset(offset).all()
-    if not ins_list:
-        return resp_json(RetCode.RES_NOT_EXIST, '已到最后一页')
-
-    ins_array = []
-    for ins in ins_list:
-        # 把Instruction对象信息转为字典形式保持，方便json序列化
-        ins_array.append(ins.dict())
-    resp_data = {
-        'retCode': 0,
-        'retMsg': '',
-        'ins': ins_array
-    }
-    return json.dumps(resp_data, ensure_ascii=False)

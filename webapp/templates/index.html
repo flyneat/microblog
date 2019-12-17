@@ -6,4 +6,7 @@
     <p>{{post.author.username}} says: <b>{{post.body}}</b></p>
 </div>
 {% endfor %}
+<!-- 下载页面测试 -->
+<a href="{{ url_for('postfile_dl',insts_id=insts_id ) }}" role="button">下载</a>
+
 {% endblock %}

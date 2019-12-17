@@ -1,5 +1,6 @@
 import json
 import os
+import zipfile
 
 from flask import request
 from werkzeug.datastructures import FileStorage
@@ -88,12 +89,12 @@ def save_upfile(fs: FileStorage) -> (bool, dict):
     filename = fs.filename
     file_type = 'unknown'
     dot_index = filename.rfind('.')
-    from webapp.constants import POST_FILE_DIR, os
+    from webapp.constants import R_POST_FILE_DIR, os
 
-    # 默认文件存储在"./post_file"路径下
-    if not os.path.exists(POST_FILE_DIR):
-        os.makedirs(POST_FILE_DIR)
-    save_path = POST_FILE_DIR
+    # 默认文件存储在"./post_file"路径下（相对路径）
+    if not os.path.exists(R_POST_FILE_DIR):
+        os.makedirs(R_POST_FILE_DIR)
+    save_path = R_POST_FILE_DIR
     if dot_index != -1:
         # 文件需要进行分类存储
         from webapp.constants import FILE_TYPE_MAP
@@ -102,7 +103,7 @@ def save_upfile(fs: FileStorage) -> (bool, dict):
         for category, types in FILE_TYPE_MAP.items():
             if t in types:
                 file_type = category
-                save_path = '/'.join([POST_FILE_DIR, category])
+                save_path = '/'.join([R_POST_FILE_DIR, category])
                 if not os.path.exists(save_path):
                     os.mkdir(save_path)
                 break
@@ -113,7 +114,7 @@ def save_upfile(fs: FileStorage) -> (bool, dict):
     #     if src_size != 0 and src_size == length:
 
     try:
-        buffer_size = 100 * 1024  # 每次读取100KB的数据来保存
+        buffer_size = 1024 * 1024  # 每次最多读取1MB的数据来保存
         file_path = save_path + f'/{filename}'
         print('文件保存路径：' + file_path)
         fs.save(file_path, buffer_size)
@@ -130,3 +131,53 @@ def save_upfile(fs: FileStorage) -> (bool, dict):
         return False, None
     finally:
         fs.close()
+
+
+def zip_file(zip_path: str, paths: list):
+    if len(paths) > 0:
+        zfile = zipfile.ZipFile(file=zip_path, mode='a', compression=zipfile.ZIP_DEFLATED)
+        for filepath in paths:
+            filename = os.path.basename(filepath)
+            zfile.write(filepath, arcname=filename)
+        print('压缩zip文件结束')
+        zfile.__repr__()
+        zfile.close()
+    pass
+
+
+def query_by_page(model) -> json:
+    """ 分页查询 """
+    from .constants import DEFAULT_LIMIT, DEFAULT_PAGE, RetCode
+    args = get_req_args()
+    try:
+        limit = DEFAULT_LIMIT
+        lt = int(args.get('limit', -1))
+        if lt > 0:
+            limit = lt
+    except ValueError as e:
+        print(f'取limit参数出现异常，原因{e}')
+        return resp_json(RetCode.EMPTY_ARG, f"limit = {args.get('limit')} 不是整数")
+    try:
+        page = DEFAULT_PAGE
+        p = int(args.get('page', -1))
+        if p > 0:
+            page = p
+    except ValueError as e:
+        print(f'取page参数出现异常，原因{e}')
+        return resp_json(RetCode.INVALID_PARAMETER, f"page = {args.get('page')} 不是整数")
+
+    offset = (page - 1) * limit
+    m_list = model.query.limit(limit).offset(offset).all()
+    if not m_list:
+        return resp_json(RetCode.RES_NOT_EXIST, '已到最后一页')
+
+    model_list = []
+    for m in m_list:
+        # 把Instruction对象信息转为字典形式保持，方便json序列化
+        model_list.append(m.dict_form())
+    resp_data = {
+        'retCode': 0,
+        'retMsg': '',
+        model.__tablename__: model_list
+    }
+    return json.dumps(resp_data, ensure_ascii=False)
