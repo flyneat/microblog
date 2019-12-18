@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
-<div><p>welcome <b>{{ user.name}}</b></p></div>
-{% for post in posts: %}
-<div>
-    <p>{{post.author.username}} says: <b>{{post.body}}</b></p>
-</div>
-{% endfor %}
+{% if username %}
+<p>welcome: <b>{{username}}</b></p>
 <!-- 下载页面测试 -->
-<a href="{{ url_for('postfile_dl',insts_id=insts_id ) }}" role="button">下载</a>
-
+<div>
+    <a href="{{ url_for('postfile_dl',insts_id=insts_id ) }}" role="button">下载</a>
+</div>
+{% else %}
+<p style="font_color: red">请先登录</p>
+{% endif %}
 {% endblock %}

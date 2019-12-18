@@ -3,22 +3,28 @@
 <head>
     <meta charset="UTF-8">
     {% if title %}
-    <title>{{ title }} - Microblog</title>
+    <title>{{ title }} - MicroBlog</title>
     {% else %}
-    <title>Welcome Microblog</title>
+    <title>MicroBlog</title>
     {% endif %}
+    <link rel="stylesheet" href="static/css/login.css">
 </head>
 <body>
-<div>Microblog: <a href="{{ url_for('index') }}">Home</a> <a href="{{ url_for('login') }}">登录</a></div>
+<div>文件管理平台:
+    <a href="{{ url_for('index') }}">主页</a> |
+    <a href="{{ url_for('login') }}">登录</a> |
+    <a href="{{ url_for('logout') }}">注销</a> |
+    <a href="{{ url_for('test') }}">测试页面</a>
+
+</div>
 <hr color="blue"/>
 {% with msgs = get_flashed_messages() %}
 {% if msgs %}
-{% set i = 0%}
+{% set i = 0 %}
 <div>
     <ul>
         {% for msg in msgs %}
-        {% set i = i + 1 %}
-        <li>flash msg{{ i }}: {{ msg }}</li>
+        <li>{{ msg }}</li>
         {% endfor %}
     </ul>
 </div>

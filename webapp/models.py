@@ -1,9 +1,11 @@
-from . import db
 from datetime import datetime
+from flask_login import UserMixin
 import json
+from . import db, login_manager
+from .utils import gen_pwd_hash, check_pwd
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     """
      用户表
     """
@@ -13,8 +15,21 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True)
     pwd_hash = db.Column(db.String(128))
 
+    def __init__(self, name=None, telno=None, password=None) -> None:
+        super().__init__()
+        self.name = name
+        self.telno = telno
+        self.setpassword(password)
+
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     insts = db.relationship('Instruction', backref='who', lazy='dynamic')
+
+    def setpassword(self, pwd):
+        hash = gen_pwd_hash(pwd)
+        self.pwd_hash = hash
+
+    def check_pwd(self, pwd):
+        return check_pwd(pwd, self.pwd_hash)
 
     def __repr__(self) -> str:
         return f'User: {self.name}'
@@ -116,3 +131,8 @@ class PostFile(db.Model):
             'sn': self.sn,
             'insts_id': self.insts_id
         }
+
+
+@login_manager.user_loader
+def load_user(id: str):
+    return User.query.get(int(id))

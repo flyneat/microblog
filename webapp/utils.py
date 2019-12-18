@@ -4,6 +4,8 @@ import zipfile
 
 from flask import request
 from werkzeug.datastructures import FileStorage
+from werkzeug.security import generate_password_hash as gph
+from werkzeug.security import check_password_hash as cph
 
 '''
     args = request.args -> GET方法请求参数
@@ -181,3 +183,11 @@ def query_by_page(model) -> json:
         model.__tablename__: model_list
     }
     return json.dumps(resp_data, ensure_ascii=False)
+
+
+def check_pwd(pwd, pwd_hash) -> bool:
+    return cph(pwd_hash, pwd)
+
+
+def gen_pwd_hash(pwd) -> str:
+    return gph(pwd)
